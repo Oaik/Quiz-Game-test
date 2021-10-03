@@ -4,10 +4,22 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 )
+
+type problem struct {
+	question string
+	answer   string
+}
+
+func parseLine(lines [][]string) []problem {
+	ret := make([]problem, len(lines))
+	for idx, val := range lines {
+		ret[idx] = problem{val[0], val[1]}
+	}
+	return ret
+}
 
 func main() {
 	fptr := flag.String("fpath", "problems.csv", "file path to read from")
@@ -18,19 +30,16 @@ func main() {
 	}
 	r := csv.NewReader(f)
 	cnt := 0
-	for {
-		record, err := r.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(record)
+	lines, err := r.ReadAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+	problems := parseLine(lines)
+	for idx, problem := range problems {
+		fmt.Printf("Problem #%d: %s = \n", idx+1, problem.question)
 		var text string
 		fmt.Scanf("%s\n", &text)
-
-		if text == record[1] {
+		if text == problem.answer {
 			cnt = cnt + 1
 		}
 	}
